@@ -34,6 +34,13 @@ type Tokengen struct {
 // GenerateToken relies on the crypto/rand package for it's random data
 // source, rather than the math package, so is ideally suited for secure
 // uses such as password, token and url generation.
+//  func GenerateOneTimePassword() (string, error){
+//  	tokengen := tokengen.Tokengen{
+//  		Length: 40,
+//  		Charset: tokengen.DefaultCharset,
+//  	}
+//  	return tokengen.GenerateToken()
+//  }
 func (t Tokengen) GenerateToken() (string, error) {
 	if t.Length < 0 {
 		return "", errors.New("length cannot be negative")
