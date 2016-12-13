@@ -5,7 +5,7 @@ your character set and token length, and as such is ideally suited for generatin
 tokens in any language, random urls, passwords, and access tokens.
 
 tokengen relies on the `crypto/rand` package, mapping values evenly to the character set
-given, disregarding any values outside of the range given.
+given, disregarding any values out of range.
 
 ```go
 
