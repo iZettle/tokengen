@@ -1,7 +1,8 @@
 # tokengen
 
-tokengen is small, simple and flexible token generator. tokengen allows you to specify
-your character set and token length, and as such is ideally suited for generating secure
+A small, simple and flexible token generator for tokens, urls, and passwords. 
+
+tokengen allows you to specify your character set and token length, and as such is ideally suited for generating secure
 tokens in any language, random urls, passwords, and access tokens.
 
 tokengen relies on the `crypto/rand` package, mapping values evenly to the character set
