@@ -1,11 +1,19 @@
 package tokengen
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"testing"
 )
 
-func TestTokengen_GenerateToken(t *testing.T) {
+type dummyReader struct{}
+
+func (dr dummyReader) Read(_ []byte) (int, error) {
+	return 0, errors.New(`could not read`)
+}
+
+func TestTokengen_GenerateTokenMultipleLengths(t *testing.T) {
 
 	testCases := []int{
 		32,
@@ -15,14 +23,16 @@ func TestTokengen_GenerateToken(t *testing.T) {
 		1,
 	}
 	for _, expected := range testCases {
-		tg, err := New(DefaultCharset, expected)
-		if err != nil {
-			t.Fatal(err)
-		}
-		token, err := tg.GenerateToken()
-		if actual := len(token); actual != expected {
-			t.Fatalf("Expected length of %v got %v for tokengen of %v", expected, actual, tg)
-		}
+		t.Run(fmt.Sprint(`Lenght:%v`, expected), func(t *testing.T) {
+			tg, err := New(DefaultCharset, expected)
+			if err != nil {
+				t.Fatal(err)
+			}
+			token, err := tg.GenerateToken()
+			if actual := len(token); actual != expected {
+				t.Fatalf("Expected length of %v got %v for tokengen of %v", expected, actual, tg)
+			}
+		})
 	}
 }
 
@@ -36,8 +46,6 @@ func TestTokengen_OccurenceWithinTwoPercentOfAverage(t *testing.T) {
 		t.Fatal(err)
 	}
 	tokengen := Tokengen{
-		Charset:     DefaultCharset,
-		Length:      1 << 12,
 		distributor: newRuneDistributor([]rune(DefaultCharset), 1<<12, file),
 	}
 	scores := genEmptyMap(DefaultCharset)
@@ -69,14 +77,21 @@ func TestTokengen_OccurenceWithinTwoPercentOfAverage(t *testing.T) {
 	}
 }
 
-func TestTokengen_GenerateToken3(t *testing.T) {
+func TestTokengen_InvalidLength(t *testing.T) {
 	_, err := New(DefaultCharset, -13)
 	if err == nil {
 		t.Fatal(`no error returned for error case`)
 	}
 }
 
-func TestTokengen_GenerateToken4(t *testing.T) {
+func TestTokengen_InvalidCharset(t *testing.T) {
+	_, err := New(``, 40)
+	if err == nil {
+		t.Fatal(`no error returned for error case`)
+	}
+}
+
+func TestTokengen_GenerateToken(t *testing.T) {
 	tokengen, err := New(`0123456789abcdef`, 64)
 	if err != nil {
 		t.Fatal(err)
@@ -84,6 +99,16 @@ func TestTokengen_GenerateToken4(t *testing.T) {
 	if _, err := tokengen.GenerateToken(); err != nil {
 		t.Log(err)
 		t.FailNow()
+	}
+}
+
+func TestTokengen_GenerateTokenErroringRandSource(t *testing.T) {
+	tokengen := Tokengen{
+		distributor: newRuneDistributor([]rune(DefaultCharset), 1<<12, dummyReader{}),
+	}
+	_, err := tokengen.GenerateToken()
+	if err == nil {
+		t.Fatal(`no error for invalid randsource`)
 	}
 }
 

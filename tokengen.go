@@ -28,8 +28,6 @@ func New(charset string, length int) (Tokengen, error) {
 		return Tokengen{}, errors.New(`charset must contain characters`)
 	}
 	return Tokengen{
-		Charset:     charset,
-		Length:      length,
 		distributor: newRuneDistributor([]rune(charset), length, rand.Reader),
 	}, nil
 }
@@ -37,8 +35,6 @@ func New(charset string, length int) (Tokengen, error) {
 // Tokengen implements TokenProvider and contains the configuration for
 // generating cryptographically secure tokens.
 type Tokengen struct {
-	Charset     string
-	Length      int
 	distributor runeDistributor
 }
 
@@ -48,10 +44,10 @@ type Tokengen struct {
 // source, rather than the math package, so is ideally suited for secure
 // uses such as password, token and url generation.
 //  func GenerateOneTimePassword() (string, error){
-//  	tokengen := tokengen.Tokengen{
-//  		Length: 40,
-//  		Charset: tokengen.DefaultCharset,
-//  	}
+//  	tokengen, err := tokengen.New(tokengen.DefaultCharset, 12)
+//	if err != nil {
+//		return ``, err
+//	}
 //  	return tokengen.GenerateToken()
 //  }
 func (t Tokengen) GenerateToken() (string, error) {
