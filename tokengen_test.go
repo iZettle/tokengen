@@ -1,35 +1,47 @@
 package tokengen
 
 import (
-	"math"
+	"os"
 	"testing"
 )
 
 func TestTokengen_GenerateToken(t *testing.T) {
-	cases := []int{32, 4096, 64, 12, 1}
 
-	tg := Tokengen{Charset: DefaultCharset}
-	for _, expected := range cases {
-		tg.Length = expected
-		if token, err := tg.GenerateToken(); err == nil {
-			if actual := len(token); actual != expected {
-				t.Logf("Expected length of %v got %v for tokengen of %v", expected, actual, tg)
-				t.FailNow()
-			}
-		} else {
-			t.Log(err)
-			t.FailNow()
+	testCases := []int{
+		32,
+		4096,
+		64,
+		12,
+		1,
+	}
+	for _, expected := range testCases {
+		tg, err := New(DefaultCharset, expected)
+		if err != nil {
+			t.Fatal(err)
+		}
+		token, err := tg.GenerateToken()
+		if actual := len(token); actual != expected {
+			t.Fatalf("Expected length of %v got %v for tokengen of %v", expected, actual, tg)
 		}
 	}
 }
 
-func TestTokengen_GenerateToken2(t *testing.T) {
+func TestTokengen_OccurenceWithinTwoPercentOfAverage(t *testing.T) {
+	if testing.Short() {
+		t.Skip(`this test should be ran if you've done a major refactor.'`)
+	}
+	file, err := os.Open(`random.data`)
+	defer file.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
 	tokengen := Tokengen{
-		Charset: DefaultCharset,
-		Length:  (1 << 12),
+		Charset:     DefaultCharset,
+		Length:      1 << 12,
+		distributor: newRuneDistributor([]rune(DefaultCharset), 1<<12, file),
 	}
 	scores := genEmptyMap(DefaultCharset)
-	for i := 0; i < (1 << 12); i++ {
+	for i := 0; i < (1 << 9); i++ {
 		token, err := tokengen.GenerateToken()
 		if err != nil {
 			t.Log(err)
@@ -41,48 +53,34 @@ func TestTokengen_GenerateToken2(t *testing.T) {
 	for _, score := range scores {
 		total += score
 	}
-	avg := float64(total) / float64(len(DefaultCharset))
-	differences := map[string]float64{}
 
-	min, max := 0.0, 0.0
-
-	var minstr, maxstr string
-	for key, score := range scores {
-		res := 100 - ((avg / float64(score)) * 100)
-		if res > max {
-			maxstr = key
-			max = res
+	avg := total / len(DefaultCharset)
+	twoPercent := avg / 50
+	distribution := map[string]int{}
+	for char, val := range scores {
+		dev := val - avg
+		if dev < 0 {
+			dev = -dev
 		}
-		if res < min {
-			minstr = key
-			min = res
+		distribution[char] = dev
+		if dev > twoPercent {
+			t.Fatalf(`there is a greater than two percent deviaton from average of the character '%s' with a deviation of %v compared to a two percent being %v`, char, dev, twoPercent)
 		}
-		differences[key] = res
-	}
-	if math.Abs(min)*1.15 < math.Abs(max) {
-		t.Log(minstr, min, maxstr, max)
-		t.FailNow()
 	}
 }
 
 func TestTokengen_GenerateToken3(t *testing.T) {
-	tokengen := Tokengen{
-		Charset: DefaultCharset,
-		Length:  -13,
-	}
-
-	if token, err := tokengen.GenerateToken(); err == nil {
-		t.Log(tokengen, token)
-		t.FailNow()
+	_, err := New(DefaultCharset, -13)
+	if err == nil {
+		t.Fatal(`no error returned for error case`)
 	}
 }
 
 func TestTokengen_GenerateToken4(t *testing.T) {
-	tokengen := Tokengen{
-		Charset: `0123456789abcdef`,
-		Length:  64,
+	tokengen, err := New(`0123456789abcdef`, 64)
+	if err != nil {
+		t.Fatal(err)
 	}
-
 	if _, err := tokengen.GenerateToken(); err != nil {
 		t.Log(err)
 		t.FailNow()
