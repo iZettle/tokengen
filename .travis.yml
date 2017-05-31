@@ -2,8 +2,12 @@ language: go
 
 before_install:
   - go get github.com/golang/lint/golint
+  - go get github.com/mattn/goveralls
 
 script:
-  - go test $(glide novendor)
-  - go vet $(glide novendor)
-  - golint -set_exit_status $(glide novendor)
+  - go test -v -covermode=count -coverprofile=coverage.out
+  - go vet -v
+  - golint -set_exit_status
+
+after_script:
+  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
