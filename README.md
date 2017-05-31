@@ -1,9 +1,7 @@
 # tokengen
 
 [![Coverage Status](https://coveralls.io/repos/github/intelligentpos/tokengen/badge.svg?branch=refactor%2FECO-15)](https://coveralls.io/github/intelligentpos/tokengen?branch=refactor%2FECO-15)
-
 [![GoDoc](https://godoc.org/github.com/intelligentpos/tokengen?status.svg)](https://godoc.org/github.com/intelligentpos/tokengen)
-
 [![Go Report Card](https://goreportcard.com/badge/github.com/intelligentpos/tokengen)](https://goreportcard.com/report/github.com/intelligentpos/tokengen)
 
 tokengen is small, simple and flexible token generator. tokengen allows you to specify
