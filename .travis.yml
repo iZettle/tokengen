@@ -10,4 +10,4 @@ script:
   - golint -set_exit_status
 
 after_script:
-  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
+  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS
