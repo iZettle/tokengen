@@ -10,9 +10,9 @@ given, disregarding any values outside of the range given.
 ```go
 
 func GenerateOneTimePassword() (string, error){
-    tokengen := tokengen.Tokengen{
-        Length: 40,
-        Charset: tokengen.DefaultCharset,
+    tokengen, err := tokengen.New(tokengen.DefaultCharset, 40)
+    if err != nil {
+        return tokengen, err
     }
     return tokengen.GenerateToken()
 }
