@@ -9,8 +9,11 @@ import (
 )
 
 const (
-	Base62         = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`
-	Base64         = Base62 + `+/`
+	// Base62 [A-Za-z0-9]
+	Base62 = `0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`
+	// Base64 [A-Za-z0-9+/]
+	Base64 = Base62 + `+/`
+	// DefaultCharset Base62
 	DefaultCharset = Base62
 )
 
