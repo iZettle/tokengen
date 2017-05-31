@@ -9,12 +9,12 @@ import (
 const intBytes = 1 << 2
 
 type runeDistributor struct {
-	runeset                         []rune
-	randSource                      io.Reader
-	bytsPerRuneIdx, maxValueOfBytes int
-	setLength, throwawayLimit       int
-	requiredBytes                   int
-	padding                         []byte
+	runeset                     []rune
+	randSource                  io.Reader
+	bytsPerIdx, maxValueOfBytes int
+	setLength, throwawayLimit   int
+	requiredBytes               int
+	padding                     []byte
 }
 
 func newRuneDistributor(charset []rune, length int, randSource io.Reader) runeDistributor {
@@ -23,7 +23,7 @@ func newRuneDistributor(charset []rune, length int, randSource io.Reader) runeDi
 	return runeDistributor{
 		runeset:         charset,
 		randSource:      randSource,
-		bytsPerRuneIdx:  bytes,
+		bytsPerIdx:      bytes,
 		maxValueOfBytes: maxValue,
 		setLength:       length,
 		throwawayLimit:  throwawayLimit,
@@ -47,15 +47,21 @@ func (rd runeDistributor) generateToken() ([]rune, error) {
 		return output, err
 	}
 	for i := 0; i < rd.requiredBytes && len(output) != rd.setLength; {
-		idxBytes := append(rd.padding, randBytes[i:i+rd.bytsPerRuneIdx]...)
-		randValue := binary.BigEndian.Uint32(idxBytes)
+		// Convert random bytes to an int
+		randValue := rd.bytesToInt(randBytes[i : i+rd.bytsPerIdx])
+
+		// If they're above our throwaway limit move ahead one byte
 		if randValue >= uint32(rd.throwawayLimit) {
 			i++
 			continue
 		}
+
+		// Pick the rune at that index
 		idx := int(randValue) % len(rd.runeset)
 		output = append(output, rd.runeset[idx])
-		i += rd.bytsPerRuneIdx
+
+		// Increment by the bytes per index
+		i += rd.bytsPerIdx
 	}
 	if len(output) == rd.setLength {
 		return output, nil
@@ -65,6 +71,10 @@ func (rd runeDistributor) generateToken() ([]rune, error) {
 		return output, err
 	}
 	return append(output, extra...), nil
+}
+
+func (rd runeDistributor) bytesToInt(bytes []byte) uint32 {
+	return binary.BigEndian.Uint32(append(rd.padding, bytes...))
 }
 
 func bytesPerRuneIndex(numRunes int) (bytes, maxValue int) {
@@ -83,10 +93,13 @@ func bytesPerRuneIndex(numRunes int) (bytes, maxValue int) {
 	return
 }
 
+// calcThrowawayLimit the random value over which to
 func calcThrowawayLimit(maxIdx, charsetLen int) int {
 	return maxIdx - (maxIdx % charsetLen)
 }
 
+// calcBytesRequired estimate the number of bytes of random data
+// required to generate the random string
 func calcBytesRequired(length, maxIdx, throwawayLimit, bytesPerRuneIdx int) int {
 	multiplier := float64(maxIdx) / float64(throwawayLimit)
 	increasedLength := math.Ceil(multiplier * float64(length))
