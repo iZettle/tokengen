@@ -7,6 +7,3 @@ script:
   - go test $(glide novendor)
   - go vet $(glide novendor)
   - golint -set_exit_status $(glide novendor)
-
-
-  

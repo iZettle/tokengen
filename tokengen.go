@@ -18,11 +18,11 @@ const (
 )
 
 // TokenProvider is a simple interface for abstracting token provisioning.
-
 type TokenProvider interface {
 	GenerateToken() (string, error)
 }
 
+// New get a new tokengen
 func New(charset string, length int) (Tokengen, error) {
 	if length < 1 {
 		return Tokengen{}, errors.New(`length must be a positive integer`)
