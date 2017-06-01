@@ -1,0 +1,13 @@
+language: go
+
+before_install:
+  - go get github.com/golang/lint/golint
+  - go get github.com/mattn/goveralls
+
+script:
+  - go test -v -covermode=count -coverprofile=coverage.out
+  - go vet -v
+  - golint -set_exit_status
+
+after_script:
+  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS
