@@ -78,13 +78,11 @@ func (rd runeDistributor) bytesToInt(bytes []byte) uint32 {
 }
 
 func bytesPerRuneIndex(numRunes int) (bytes, maxValue int) {
-	const maxByteValue = 1 << 8
 	permutations := 1
-
 	// iterate until we find the number of bytes that
 	// supports the number of runes we have (or more)
 	for bytes = 0; permutations <= numRunes; bytes++ {
-		permutations *= maxByteValue
+		permutations <<= 8
 	}
 
 	// while the number of permutations of values is a for the bytes is this,
