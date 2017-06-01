@@ -23,12 +23,15 @@ func TestTokengen_GenerateTokenMultipleLengths(t *testing.T) {
 		1,
 	}
 	for _, expected := range testCases {
-		t.Run(fmt.Sprintf(`Lenght: %v`, expected), func(t *testing.T) {
+		t.Run(fmt.Sprintf(`Length: %v`, expected), func(t *testing.T) {
 			tg, err := New(DefaultCharset, expected)
 			if err != nil {
 				t.Fatal(err)
 			}
 			token, err := tg.GenerateToken()
+			if err != nil {
+				t.Fatal(err)
+			}
 			if actual := len(token); actual != expected {
 				t.Fatalf("Expected length of %v got %v for tokengen of %v", expected, actual, tg)
 			}
