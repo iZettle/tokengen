@@ -14,7 +14,6 @@ func (dr dummyReader) Read(_ []byte) (int, error) {
 }
 
 func TestTokengen_GenerateTokenMultipleLengths(t *testing.T) {
-
 	testCases := []int{
 		32,
 		4096,
@@ -41,7 +40,7 @@ func TestTokengen_GenerateTokenMultipleLengths(t *testing.T) {
 
 func TestTokengen_OccurenceWithinTwoPercentOfAverage(t *testing.T) {
 	if testing.Short() {
-		t.Skip(`this test should be ran if you've done a major refactor.'`)
+		t.Skip(`this test should be ran if you've done a major refactor.`)
 	}
 	file, err := os.Open(`random.data`)
 	defer file.Close()
